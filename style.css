@@ -526,7 +526,6 @@ main {
 .percentage {
   font-size: 0.8rem;
   color: var(--secondary);
-  text-align: right;
 }
 
 .vote-btn {
