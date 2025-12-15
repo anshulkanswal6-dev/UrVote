@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UrVote · Blockchain Voting DApp</title>
+  <!-- Text favicon "UrVote" as SVG -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="12" fill="%230b1120"/%3E%3Ctext x="50%" y="52%" text-anchor="middle" fill="%23ffffff" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="600"%3EUrVote%3C/text%3E%3C/svg%3E'
+  />
+
+  <link rel="stylesheet" href="style.css" />
+  <!-- Ethers v5 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <div class="logo-icon">🗳️</div>
+        <div class="logo-text">
+          <span class="logo-title">UrVote</span>
+          <span class="logo-subtitle">Instant EVM polls</span>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="#hero">Home</a>
+        <a href="#polls">Polls</a>
+      </nav>
+      <div class="header-actions">
+        <button id="connectBtn" class="connect-btn">Connect Wallet</button>
+        <span id="walletAddress" class="wallet-address"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero / Intro -->
+    <section class="hero" id="hero">
+      <div class="hero-text">
+        <p class="hero-kicker">UrVote · EVM-native polling</p>
+        <h1>Vote. Decide. Ship.</h1>
+        <p class="hero-subtitle">
+          UrVote turns simple questions into instant, on-chain decisions for DAOs, teams, and communities.
+          Connect your wallet and start secure voting in seconds.
+        </p>
+        <p class="hero-caption">
+          Draw your options, let the chain do the counting — one wallet, one verifiable vote.
+        </p>
+        <div class="hero-cta">
+          <button id="heroCreateBtn" class="btn primary hero-primary">
+            <span class="btn-icon">⚡</span>
+            <span>Create a poll</span>
+          </button>
+          <button id="heroBrowseBtn" class="btn ghost hero-secondary">
+            Browse polls
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats / feature strip -->
+    <section class="stats-strip">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <div class="stat-label">EVM-native</div>
+          <div class="stat-value">Smart contract polls</div>
+          <div class="stat-caption">Runs on any supported EVM network your wallet connects to.</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Instant polls</div>
+          <div class="stat-value">Go live in seconds</div>
+          <div class="stat-caption">Create, share, and start collecting on-chain votes immediately.</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">One-wallet-one-vote</div>
+          <div class="stat-value">Built-in sybil protection</div>
+          <div class="stat-caption">Each address can only vote once per poll, enforced in the contract.</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Live results</div>
+          <div class="stat-value">Real-time updates</div>
+          <div class="stat-caption">Progress bars and timers update as new votes are mined.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main app layout -->
+    <section class="app-layout" id="polls">
+      <div class="app-left">
+        <section id="createPoll" class="card section">
+          <div class="section-header">
+            <h2>Create a new poll</h2>
+            <p>Ask a question, add options, and choose how long voting stays open.</p>
+          </div>
+          <label class="field-label" for="questionInput">Question</label>
+          <input
+            type="text"
+            id="questionInput"
+            placeholder="What should we build next?"
+            class="input-field"
+          />
+          <label class="field-label" for="optionsInput">Options</label>
+          <input
+            type="text"
+            id="optionsInput"
+            placeholder="Option 1, Option 2, Option 3..."
+            class="input-field"
+          />
+          <label class="field-label" for="durationInput">Duration (seconds)</label>
+          <input
+            type="number"
+            id="durationInput"
+            placeholder="e.g. 3600 for 1 hour"
+            class="input-field"
+            min="1"
+          />
+          <button id="createPollBtn" class="btn full-width">Create Poll</button>
+          <p class="helper-text">
+            Once created, the poll is stored on-chain and cannot be edited. Double‑check your
+            question and options before publishing.
+          </p>
+        </section>
+      </div>
+
+      <div class="app-right">
+        <section class="card section">
+          <div class="section-header">
+            <h2>Polls</h2>
+            <p>Switch between live and finished polls, then cast your vote with one click.</p>
+          </div>
+          <div class="poll-tabs" role="tablist">
+            <button class="poll-tab active" data-target="activePollsPanel" type="button">Active</button>
+            <button class="poll-tab" data-target="pastPollsPanel" type="button">Finished</button>
+          </div>
+
+          <section id="activePolls" class="poll-section tab-panel is-active" aria-labelledby="activePollsTab">
+            <div id="activePollsContainer" class="polls-container"></div>
+          </section>
+
+          <section id="pastPolls" class="poll-section tab-panel" aria-labelledby="pastPollsTab">
+            <div id="pastPollsContainer" class="polls-container"></div>
+          </section>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div align="center" class="footer-inner">
+      <div class="footer-meta">
+        Made For Demo :) — Let's Quacking Goo...
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Simple tab UX for polls
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.poll-tab');
+      const panels = document.querySelectorAll('.tab-panel');
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('is-active'));
+
+          tab.classList.add('active');
+          panels[index].classList.add('is-active');
+        });
+      });
+
+      // Hero CTA scroll helpers
+      const heroCreateBtn = document.getElementById('heroCreateBtn');
+      const heroBrowseBtn = document.getElementById('heroBrowseBtn');
+      if (heroCreateBtn) {
+        heroCreateBtn.addEventListener('click', () => {
+          document.getElementById('createPoll')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      if (heroBrowseBtn) {
+        heroBrowseBtn.addEventListener('click', () => {
+          document.getElementById('polls')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
