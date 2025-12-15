@@ -270,14 +270,15 @@ async function loadPolls() {
   // Clear existing timers before loading new ones
   clearAllTimers();
 
-  let count;
+  let count = 0;
   try {
-    count = (await contract.getPollCount()).toNumber();
+    const pollCount = await contract.getPollCount();
+    if (pollCount) {
+      count = pollCount.toNumber();
+    }
   } catch (err) {
-    console.error("Error getting poll count:", err);
-    activeContainer.innerHTML =
-      "<p>Error: could not load polls (getPollCount failed).</p>";
-    return;
+    console.warn("Could not get poll count, defaulting to 0:", err);
+    // Continue with count = 0 to allow other functionality to work
   }
 
   const nowTs = Math.floor(Date.now() / 1000);
