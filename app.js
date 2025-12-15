@@ -128,8 +128,15 @@ const walletAddress = document.getElementById("walletAddress");
 
 // ===== Init =====
 async function init() {
+  // Only run in browser
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   if (typeof window.ethereum === "undefined") {
-    alert("Please install MetaMask or another Web3 wallet to use this dApp!");
+    console.log("Web3 wallet not detected");
+    // Still try to load polls in read-only mode
+    await loadPolls();
     return;
   }
 
@@ -150,7 +157,8 @@ async function init() {
     setupEventListeners();
   } catch (err) {
     console.error("Error initializing app:", err);
-    alert("Failed to initialize dApp. Check console for details.");
+    // Still try to load polls in read-only mode
+    await loadPolls();
   }
 }
 
@@ -232,26 +240,31 @@ function updateUI() {
 
 // ===== Poll Loading =====
 async function loadPolls() {
-  if (!contract) return;
-
   const activeContainer = document.getElementById("activePollsContainer");
   const pastContainer = document.getElementById("pastPollsContainer");
 
-  // Show loading state without clearing existing content immediately
-  const activeLoading = activeContainer.querySelector('.loading-marker');
-  const pastLoading = pastContainer.querySelector('.loading-marker');
-  
-  if (!activeLoading) {
-    const loadingEl = document.createElement('div');
-    loadingEl.className = 'loading-marker';
-    loadingEl.textContent = 'Loading...';
-    activeContainer.prepend(loadingEl);
+  if (!activeContainer || !pastContainer) {
+    console.error("Containers not found");
+    return;
   }
-  
-  if (!pastLoading) {
-    const loadingEl = document.createElement('div');
-    loadingEl.className = 'loading-marker';
-    pastContainer.prepend(loadingEl);
+
+  // Show loading state
+  activeContainer.innerHTML = '<div class="loading-marker">Loading polls...</div>';
+  pastContainer.innerHTML = '';
+
+  // If contract isn't initialized, try to initialize it in read-only mode
+  if (!contract && typeof window.ethereum !== 'undefined') {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+    } catch (err) {
+      console.error("Error initializing read-only contract:", err);
+      activeContainer.innerHTML = '<p class="error-message">Error: Could not connect to the blockchain. Please try again later.</p>';
+      return;
+    }
+  } else if (!contract) {
+    activeContainer.innerHTML = '<p class="error-message">Error: Web3 provider not available. Please install MetaMask or another Web3 wallet.</p>';
+    return;
   }
 
   // Clear existing timers before loading new ones
