@@ -1,5 +1,5 @@
 // ===== Contract Details =====
-const CONTRACT_ADDRESS = "0xe8b3182C70bc0a84304dED3884d50Ee7e03FaE6d";
+const CONTRACT_ADDRESS = "0xEA632d060Da72A866DB06f8072287150fB69bd91";
 
 const CONTRACT_ABI = [
   {
@@ -696,4 +696,5 @@ window.addEventListener("load", () => {
     alert("Failed to initialize the application. Please check the console for details.");
   });
 });
+
 
