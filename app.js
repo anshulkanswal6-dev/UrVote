@@ -1,5 +1,17 @@
-// ===== Contract Details =====
-const CONTRACT_ADDRESS = "0xEA632d060Da72A866DB06f8072287150fB69bd91";
+// ===== Network & Contract Details =====
+const BSC_TESTNET = {
+  chainId: '0x61',
+  chainName: 'BNB Smart Chain Testnet',
+  nativeCurrency: {
+    name: 'tBNB',
+    symbol: 'tBNB',
+    decimals: 18
+  },
+  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+  blockExplorerUrls: ['https://testnet.bscscan.com/']
+};
+
+const CONTRACT_ADDRESS = "0xe8b3182C70bc0a84304dED3884d50Ee7e03FaE6d";
 
 const CONTRACT_ABI = [
   {
@@ -126,6 +138,35 @@ const connectBtn = document.getElementById("connectBtn");
 const createPollBtn = document.getElementById("createPollBtn");
 const walletAddress = document.getElementById("walletAddress");
 
+// ===== Network =====
+async function switchToBscTestnet() {
+  if (!window.ethereum) return false;
+  
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: BSC_TESTNET.chainId }],
+    });
+    return true;
+  } catch (switchError) {
+    // This error code indicates that the chain has not been added to MetaMask
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [BSC_TESTNET],
+        });
+        return true;
+      } catch (addError) {
+        console.error('Error adding BSC Testnet:', addError);
+        return false;
+      }
+    }
+    console.error('Error switching to BSC Testnet:', switchError);
+    return false;
+  }
+}
+
 // ===== Init =====
 async function init() {
   // Only run in browser
@@ -138,6 +179,12 @@ async function init() {
     // Still try to load polls in read-only mode
     await loadPolls();
     return;
+  }
+  
+  // Check and switch to BSC Testnet
+  const isOnCorrectNetwork = await switchToBscTestnet();
+  if (!isOnCorrectNetwork) {
+    console.warn('Could not switch to BSC Testnet');
   }
 
   try {
@@ -187,6 +234,13 @@ async function connectWallet() {
   if (typeof window.ethereum === "undefined") {
     alert("Please install MetaMask or another Web3 wallet to connect!");
     window.open("https://metamask.io/download.html", "_blank");
+    return;
+  }
+  
+  // Ensure we're on BSC Testnet
+  const isOnCorrectNetwork = await switchToBscTestnet();
+  if (!isOnCorrectNetwork) {
+    alert('Please switch to BSC Testnet in your wallet to continue');
     return;
   }
 
