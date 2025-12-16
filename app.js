@@ -1,46 +1,3 @@
-/************************************
- * NETWORK CONFIG (ADDED)
- ************************************/
-const BSC_TESTNET_CHAIN_ID = "0x61"; // 97
-
-const BSC_TESTNET_PARAMS = {
-  chainId: "0x61",
-  chainName: "BNB Smart Chain Testnet",
-  nativeCurrency: {
-    name: "tBNB",
-    symbol: "tBNB",
-    decimals: 18,
-  },
-  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545"],
-  blockExplorerUrls: ["https://testnet.bscscan.com"],
-};
-
-async function ensureBSCNetwork() {
-  if (!window.ethereum) return;
-
-  const chainId = await window.ethereum.request({
-    method: "eth_chainId",
-  });
-
-  if (chainId !== BSC_TESTNET_CHAIN_ID) {
-    try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: BSC_TESTNET_CHAIN_ID }],
-      });
-    } catch (err) {
-      if (err.code === 4902) {
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [BSC_TESTNET_PARAMS],
-        });
-      } else {
-        throw err;
-      }
-    }
-  }
-}
-
 // ===== Contract Details =====
 const CONTRACT_ADDRESS = "0xEA632d060Da72A866DB06f8072287150fB69bd91";
 
@@ -191,7 +148,6 @@ async function init() {
     const accounts = await provider.listAccounts();
     if (accounts.length > 0) {
       currentAccount = accounts[0];
-      await ensureBSCNetwork();
       updateUI();
     } else {
       // still load polls in read-only mode
@@ -237,7 +193,6 @@ async function connectWallet() {
   try {
     connectBtn.disabled = true;
     connectBtn.textContent = "Connecting...";
-    await ensureBSCNetwork();
 
     // Request account access if needed
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -247,7 +202,6 @@ async function connectWallet() {
     }
     
     currentAccount = accounts[0];
-    await ensureBSCNetwork();
     
     // Re-initialize provider and contract with the new account
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -285,12 +239,6 @@ function updateUI() {
 }
 
 // ===== Poll Loading =====
-const chainId = await window.ethereum.request({ method: "eth_chainId" });
-if (chainId !== BSC_TESTNET_CHAIN_ID) {
-  alert("Please switch to BNB Smart Chain Testnet");
-  return;
-}
-
 async function loadPolls() {
   const activeContainer = document.getElementById("activePollsContainer");
   const pastContainer = document.getElementById("pastPollsContainer");
@@ -346,12 +294,6 @@ async function loadPolls() {
       const isActive = nowTs < endTime;
 
       // Votes
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      if (chainId !== BSC_TESTNET_CHAIN_ID) {
-        alert("Please switch to BNB Smart Chain Testnet");
-        return;
-      }
-
       const votes = [];
       let totalVotes = 0;
       for (let i = 0; i < options.length; i++) {
@@ -754,7 +696,3 @@ window.addEventListener("load", () => {
     alert("Failed to initialize the application. Please check the console for details.");
   });
 });
-
-
-
-
