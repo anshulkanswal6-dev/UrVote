@@ -184,7 +184,6 @@ async function init() {
   }
 
   try {
-    await ensureBSCNetwork();
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
@@ -192,6 +191,7 @@ async function init() {
     const accounts = await provider.listAccounts();
     if (accounts.length > 0) {
       currentAccount = accounts[0];
+      await ensureBSCNetwork();
       updateUI();
     } else {
       // still load polls in read-only mode
@@ -247,6 +247,7 @@ async function connectWallet() {
     }
     
     currentAccount = accounts[0];
+    await ensureBSCNetwork();
     
     // Re-initialize provider and contract with the new account
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -753,6 +754,7 @@ window.addEventListener("load", () => {
     alert("Failed to initialize the application. Please check the console for details.");
   });
 });
+
 
 
 
