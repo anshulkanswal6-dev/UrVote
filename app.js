@@ -413,21 +413,42 @@ async function loadPolls() {
         try {
           const [winnerName, votesCountBn] = await contract.getWinningOption(pollId);
           const votesCount = votesCountBn.toNumber();
-          let displayWinner = "No winner (tie or no votes)";
+          let displayMessage = "No votes yet";
           
-          // Only show winner if there are votes
+          // Check for ties
           if (votesCount > 0) {
-            displayWinner = winnerName && winnerName.trim() !== "" ? 
-              winnerName : "No clear winner (tie)";
+            // Find all options with the maximum number of votes
+            const maxVotes = Math.max(...votes);
+            const winningIndices = votes.reduce((acc, voteCount, index) => {
+              if (voteCount === maxVotes) acc.push(index);
+              return acc;
+            }, []);
+            
+            if (winningIndices.length > 1) {
+              // There's a tie
+              const tiedOptions = winningIndices.map(i => options[i]).join(', ');
+              displayMessage = `Tie between: ${tiedOptions} (${maxVotes} vote${maxVotes === 1 ? '' : 's'} each)`;
               
-            // Highlight the winning option
-            for (let i = 0; i < options.length; i++) {
-              if (options[i] === winnerName) {
+              // Highlight all tied options
+              winningIndices.forEach(i => {
                 optionsHtml = optionsHtml.replace(
                   `<div class="option" data-option-index="${i}"`, 
                   `<div class="option winner-option" data-option-index="${i}"`
                 );
-                break;
+              });
+            } else {
+              // Single winner
+              displayMessage = `Max votes: ${winnerName} (${votesCount} vote${votesCount === 1 ? '' : 's'})`;
+              
+              // Highlight the winning option
+              for (let i = 0; i < options.length; i++) {
+                if (options[i] === winnerName) {
+                  optionsHtml = optionsHtml.replace(
+                    `<div class="option" data-option-index="${i}"`, 
+                    `<div class="option winner-option" data-option-index="${i}"`
+                  );
+                  break;
+                }
               }
             }
           }
@@ -450,7 +471,7 @@ async function loadPolls() {
               <span style="font-size: 1.5rem;"></span>
               <div style="text-align: center;">
                 <div style="font-size: 1.1em; margin-bottom: 0.25rem;">Poll Ended</div>
-                <div>MAX VOTES ON: <strong>${displayWinner}</strong> (${votesCount} vote${votesCount === 1 ? '' : 's'})</div>
+                <div>${displayMessage}</div>
               </div>
             </div>
             <style>
