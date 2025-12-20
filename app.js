@@ -11,7 +11,7 @@ const BSC_TESTNET = {
   blockExplorerUrls: ['https://testnet.bscscan.com/']
 };
 
-const CONTRACT_ADDRESS = "0x2a8C5971Ecd240A73a04115aAE1428c785329b00";
+const CONTRACT_ADDRESS = "0x8932DeB612903414021546e2760484Cc34AE1a7b";
 
 const CONTRACT_ABI = [
   {
@@ -771,4 +771,5 @@ window.addEventListener("load", () => {
     alert("Failed to initialize the application. Please check the console for details.");
   });
 });
+
 
